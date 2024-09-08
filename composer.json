@@ -27,7 +27,7 @@
     },
     "autoload-dev": {
         "psr-4": { 
-            "Tests\\Az\\Route\\": "vendor/alpha-zeta/session/tests/"
+            "Tests\\Az\\Session\\": "vendor/alpha-zeta/session/tests/"
         }
     }
 }
