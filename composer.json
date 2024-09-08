@@ -10,6 +10,7 @@
             "email": "world.zay@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
     "require": {
         "php": "^8.2"
     },
