@@ -20,6 +20,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11",
+        "mockery/mockery": "^1.6",
         "httpsoft/http-message": "^1.0",
         "httpsoft/http-runner": "^1.0",
         "httpsoft/http-server-request": "^1.0",
