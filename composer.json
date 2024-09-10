@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Az\\Session\\": "vendor/alpha-zeta/session/src/"
+            "Az\\Session\\": "src/"
         }
     },
     "require-dev": {
@@ -28,7 +28,7 @@
     },
     "autoload-dev": {
         "psr-4": { 
-            "Tests\\Az\\Session\\": "vendor/alpha-zeta/session/tests/"
+            "Tests\\Az\\Session\\": "tests/"
         }
     }
 }
