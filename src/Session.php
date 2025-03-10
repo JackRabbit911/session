@@ -25,7 +25,7 @@ final class Session implements SessionInterface
     ];
 
     private array $session = [];
-    private int $regenerate = 20;
+    private int $regenerate = 0;
     private bool $guard_agent = false;
     private bool $guard_ip = false;
 
@@ -56,9 +56,13 @@ final class Session implements SessionInterface
         return $this->options['name'];
     }
 
-    public function init(): void
+    public function init($force = true): void
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        if (!isset($_COOKIE[$this->options['name']]) && !$force) {
             return;
         }
 
@@ -119,13 +123,13 @@ final class Session implements SessionInterface
 
     public function exists($key): bool
     {
-        $this->init();
+        $this->init(false);
         return array_key_exists($key, $this->session);
     }
 
     public function get(?string $key = null, $default = null): mixed
     {
-        $this->init();
+        $this->init(false);
         return ($key) ? $this->session[$key] ?? $default : $this->session ?? [];
     }
 
@@ -195,9 +199,7 @@ final class Session implements SessionInterface
 
     public function rm($key, $value)
     {
-        $this->init();
-
-        if (!isset($this->session[$key])) {
+        if (!$this->exists($key)) {
             return;
         }
 
@@ -223,7 +225,7 @@ final class Session implements SessionInterface
 
     public function keep(string $key): mixed
     {
-        $this->init();
+        $this->init(false);
         if (isset($this->session['_delete'])) {
             if (($k = array_search($key, $this->session['_delete'])) !== false) {
                 unset($this->session['_delete'][$k]);                
@@ -244,7 +246,7 @@ final class Session implements SessionInterface
 
     public function delete(...$keys): void
     {
-        $this->init();
+        $this->init(false);
         if (empty($this->session)) {
             return;
         }
@@ -255,7 +257,7 @@ final class Session implements SessionInterface
         }
 
         foreach ($keys as $key) {
-            if (array_key_exists($key, $this->session)) {
+            if ($this->exists($key)) {
                 $this->session['_delete'][] = $key;
             }
         }
@@ -263,8 +265,7 @@ final class Session implements SessionInterface
 
     public function remove($key)
     {
-        $this->init();
-        if (array_key_exists($key, $this->session)) {
+        if ($this->exists($key)) {
             unset($this->session[$key]);
         }
     }
@@ -289,7 +290,6 @@ final class Session implements SessionInterface
         }
 
         if ($killCookie === false) {
-            $this->init();
             $this->regenerate(true);
         }
     }
