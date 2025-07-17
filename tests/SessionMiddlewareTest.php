@@ -6,16 +6,22 @@ use Az\Session\Session;
 use Az\Session\Driver\ArrayDriver;
 use Az\Session\SessionInterface;
 use Az\Session\SessionMiddleware;
-use Tests\Az\Session\Deps\RequestHandler;
+use Sys\Pipeline\Pipeline;
+use Psr\Container\ContainerInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use HttpSoft\Response\TextResponse;
 use HttpSoft\Message\ServerRequest;
 use HttpSoft\Runner\MiddlewarePipeline;
 use PHPUnit\Framework\TestCase;
+use Closure;
 
 final class SessionMiddlewareTest extends TestCase
 {
     private Session $session;
-    private RequestHandler $handler;
-    private MiddlewarePipeline $pipeline;
+    private RequestHandlerInterface $handler;
+    private Pipeline $pipeline;
 
     public function setUp(): void
     {
@@ -28,12 +34,13 @@ final class SessionMiddlewareTest extends TestCase
         }
 
         $this->session = new Session(null, new ArrayDriver);
-        $this->handler = new RequestHandler(function ($request) {
+        $this->handler = $this->requestHanler(function ($request) {
             $session = $request->getAttribute('session');
             return ($session instanceof SessionInterface) ? 'true' : 'false';
         });
 
-        $this->pipeline = new MiddlewarePipeline();
+        $container = $this->createStub(ContainerInterface::class);
+        $this->pipeline = new Pipeline($container);
     }
 
     public function testProcess()
@@ -42,5 +49,18 @@ final class SessionMiddlewareTest extends TestCase
         $response = $this->pipeline->process(new ServerRequest(), $this->handler);
 
         $this->assertSame('true', $response->getBody()->getContents());
+    }
+
+    private function requestHanler(Closure $callable): RequestHandlerInterface
+    {
+        return new class ($callable) implements RequestHandlerInterface {
+            public function __construct(private $callable){}
+
+            public function handle(ServerRequestInterface $request): ResponseInterface
+            {
+                $str = call_user_func($this->callable, $request);
+                return (is_string($str)) ? new TextResponse($str) : $str;
+            }
+        };
     }
 }
