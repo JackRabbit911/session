@@ -32,6 +32,7 @@ final class SessionGuardMiddlewareTest extends TestCase
         $_SERVER['HTTP_USER_AGENT'] = 'user_agent';
 
         $session = new Session(['guard_agent' => true], new ArrayDriver);
+        $session->init(true);
 
         $this->handler = $this->requestHanler(function ($request) {
             $request_ua = $request->getServerParams()['HTTP_USER_AGENT'];
