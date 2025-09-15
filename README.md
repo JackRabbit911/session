@@ -6,16 +6,9 @@ composer require alpha-zeta/session
 config/container.php
 ```php
 return [
-    QueryBuilderHandler::class => fn() => (new Connection('mysql', config('database', 'connect.mysql')))->getQueryBuilder(),
-
-    SessionInterface::class => function (QueryBuilderHandler $qb) {
-        $handler = match (env('SESSION_DRIVER')) {
-            'DB' => new Driver\Db($qb->pdo()),
-            default => null,
-        };
-
-        return new Session(config('session'), $handler);
-    },
+    ...
+    SessionInterface::class => fn() => new Session(config('session')),
+    ...
 ];
 ```
 then see Az\Session\SessionMiddleware class.
