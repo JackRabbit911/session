@@ -296,8 +296,20 @@ final class Session implements SessionInterface
 
     public function gc(): int|false
     {
-        $this->init();
-        return session_gc();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        
+        $count = session_gc();
+        session_destroy();
+
+        return $count;
+    }
+
+    public function getExpired()
+    {
+        $lifetime = $this->options['gc_maxlifetime'];
+        return $this->saveHandler->getExpired($lifetime);
     }
 
     private function unset()
