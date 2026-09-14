@@ -3,7 +3,7 @@
 namespace Az\Session\Driver;
 
 use SessionHandlerInterface;
-use \PDO;
+use PDO;
 
 final class Db implements SessionHandlerInterface
 {
@@ -61,6 +61,15 @@ final class Db implements SessionHandlerInterface
         $sth->execute([(int) $maxlifetime]);
 
         return $sth->rowCount();
+    }
+
+    public function getExpired(int $maxlifetime): int
+    {
+        $sql = "SELECT COUNT(id) FROM sessions WHERE last_activity < (NOW() - INTERVAL ? SECOND)";
+        $sth = $this->pdo->prepare($sql);
+        $sth->execute([(int) $maxlifetime]);
+
+        return $sth->fetch(PDO::FETCH_COLUMN);
     }
 
     public function close(): bool
